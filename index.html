@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quote Requestor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero">
+      <p class="eyebrow">Sample Website</p>
+      <h1>Fast quotes for projects that should already be moving.</h1>
+      <p class="hero-copy">
+        A lightweight demo landing page for collecting project requests, highlighting services,
+        and giving visitors a simple next step.
+      </p>
+      <div class="hero-actions">
+        <a class="button button-primary" href="#request">Request a Quote</a>
+        <a class="button button-secondary" href="#services">View Services</a>
+      </div>
+    </header>
+
+    <main>
+      <section class="stats-card">
+        <div>
+          <p class="stat-value">24h</p>
+          <p class="stat-label">Typical reply window</p>
+        </div>
+        <div>
+          <p class="stat-value">12+</p>
+          <p class="stat-label">Project categories</p>
+        </div>
+        <div>
+          <p class="stat-value">98%</p>
+          <p class="stat-label">Clients who return</p>
+        </div>
+      </section>
+
+      <section class="services" id="services">
+        <div class="section-heading">
+          <p class="eyebrow">Services</p>
+          <h2>Built to make the first conversation clear.</h2>
+        </div>
+        <div class="service-grid">
+          <article class="service-card">
+            <h3>Web Builds</h3>
+            <p>Marketing pages, dashboards, and product frontends with clean handoff scope.</p>
+          </article>
+          <article class="service-card">
+            <h3>Design Systems</h3>
+            <p>Reusable UI foundations for teams that need speed without drifting quality.</p>
+          </article>
+          <article class="service-card">
+            <h3>Automation</h3>
+            <p>Internal tools and workflow scripts that remove repetitive work from the pipeline.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="request-panel" id="request">
+        <div class="section-heading">
+          <p class="eyebrow">Quick Request</p>
+          <h2>Tell us what you need.</h2>
+        </div>
+        <form class="quote-form" id="quote-form">
+          <label>
+            Name
+            <input type="text" name="name" placeholder="Your name" required>
+          </label>
+          <label>
+            Email
+            <input type="email" name="email" placeholder="you@example.com" required>
+          </label>
+          <label>
+            Project Type
+            <select name="projectType" required>
+              <option value="">Choose one</option>
+              <option>Landing Page</option>
+              <option>Web App</option>
+              <option>Redesign</option>
+              <option>Automation</option>
+            </select>
+          </label>
+          <label>
+            Budget Range
+            <input type="text" name="budget" placeholder="$2k - $5k">
+          </label>
+          <label class="full-width">
+            Brief
+            <textarea name="brief" rows="4" placeholder="Short description of the project"></textarea>
+          </label>
+          <button class="button button-primary" type="submit">Send Request</button>
+        </form>
+        <p class="form-response" id="form-response" aria-live="polite"></p>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
