@@ -1,104 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quote Requestor</title>
+  <title>Quote Request Form</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="page-shell">
-    <header class="hero">
-      <p class="eyebrow">Sample Website</p>
-      <h1>Fast quotes for projects that should already be moving.</h1>
+  <main class="page-shell">
+    <section class="request-panel">
+      <p class="eyebrow">Internal Use</p>
+      <h1>견적 요청 폼</h1>
       <p class="hero-copy">
-        A lightweight demo landing page for collecting project requests, highlighting services,
-        and giving visitors a simple next step.
+        요청 내용을 정리해서 보내는 내부용 페이지.
       </p>
-      <div class="hero-actions">
-        <a class="button button-primary" href="#request">Request a Quote</a>
-        <a class="button button-secondary" href="#services">View Services</a>
-      </div>
-    </header>
 
-    <main>
-      <section class="stats-card">
-        <div>
-          <p class="stat-value">24h</p>
-          <p class="stat-label">Typical reply window</p>
-        </div>
-        <div>
-          <p class="stat-value">12+</p>
-          <p class="stat-label">Project categories</p>
-        </div>
-        <div>
-          <p class="stat-value">98%</p>
-          <p class="stat-label">Clients who return</p>
-        </div>
-      </section>
+      <form class="quote-form" id="quote-form">
+        <label>
+          요청자 회사
+          <input type="text" name="company" placeholder="회사명을 입력하세요" required>
+        </label>
+        <label>
+          물건 브랜드
+          <input type="text" name="brand" placeholder="브랜드명을 입력하세요" required>
+        </label>
+        <label>
+          수량
+          <input type="number" name="quantity" min="1" placeholder="예: 100" required>
+        </label>
+        <label>
+          품번
+          <input type="text" name="sku" placeholder="품번을 입력하세요" required>
+        </label>
+        <label class="full-width">
+          물건 타입
+          <input type="text" name="itemType" placeholder="예: 가방, 부품, 패키지" required>
+        </label>
+        <label class="full-width">
+          부가 설명
+          <textarea name="details" rows="5" placeholder="추가 요청 사항이나 참고 내용을 적어주세요"></textarea>
+        </label>
+        <label class="full-width">
+          참고 사진
+          <input type="file" id="photo-input" name="photos" accept="image/*" multiple>
+        </label>
+        <p class="file-help full-width" id="file-help">여러 장 선택할 수 있습니다.</p>
+        <button class="button button-primary" id="submit-button" type="submit">메일로 보내기</button>
+      </form>
 
-      <section class="services" id="services">
-        <div class="section-heading">
-          <p class="eyebrow">Services</p>
-          <h2>Built to make the first conversation clear.</h2>
-        </div>
-        <div class="service-grid">
-          <article class="service-card">
-            <h3>Web Builds</h3>
-            <p>Marketing pages, dashboards, and product frontends with clean handoff scope.</p>
-          </article>
-          <article class="service-card">
-            <h3>Design Systems</h3>
-            <p>Reusable UI foundations for teams that need speed without drifting quality.</p>
-          </article>
-          <article class="service-card">
-            <h3>Automation</h3>
-            <p>Internal tools and workflow scripts that remove repetitive work from the pipeline.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="request-panel" id="request">
-        <div class="section-heading">
-          <p class="eyebrow">Quick Request</p>
-          <h2>Tell us what you need.</h2>
-        </div>
-        <form class="quote-form" id="quote-form">
-          <label>
-            Name
-            <input type="text" name="name" placeholder="Your name" required>
-          </label>
-          <label>
-            Email
-            <input type="email" name="email" placeholder="you@example.com" required>
-          </label>
-          <label>
-            Project Type
-            <select name="projectType" required>
-              <option value="">Choose one</option>
-              <option>Landing Page</option>
-              <option>Web App</option>
-              <option>Redesign</option>
-              <option>Automation</option>
-            </select>
-          </label>
-          <label>
-            Budget Range
-            <input type="text" name="budget" placeholder="$2k - $5k">
-          </label>
-          <label class="full-width">
-            Brief
-            <textarea name="brief" rows="4" placeholder="Short description of the project"></textarea>
-          </label>
-          <button class="button button-primary" type="submit">Send Request</button>
-        </form>
-        <p class="form-response" id="form-response" aria-live="polite"></p>
-      </section>
-    </main>
-  </div>
+      <p class="form-response" id="form-response" aria-live="polite"></p>
+    </section>
+  </main>
 
   <script src="script.js"></script>
 </body>
