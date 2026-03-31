@@ -52,8 +52,11 @@ function formatResponseMessage(result, fallbackMessage) {
     lines.push(
       `RESEND_API_KEY loaded: ${result.env.resendApiKeyPresent ? "YES" : "NO"}`,
       `RESEND_API_KEY masked: ${result.env.resendApiKeyMasked || "null"}`,
+      `EMAIL_FROM loaded: ${result.env.emailFromPresent ? "YES" : "NO"}`,
+      `EMAIL_FROM masked: ${result.env.emailFromMasked || "null"}`,
       `RESEND_FROM_EMAIL loaded: ${result.env.resendFromEmailPresent ? "YES" : "NO"}`,
       `RESEND_FROM_EMAIL masked: ${result.env.resendFromEmailMasked || "null"}`,
+      `Effective sender masked: ${result.env.effectiveFromEmailMasked || "null"}`,
       `RESEND_TO_EMAIL loaded: ${result.env.resendToEmailPresent ? "YES" : "NO"}`,
       `RESEND_TO_EMAIL masked: ${result.env.resendToEmailMasked || "null"}`,
     );

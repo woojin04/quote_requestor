@@ -1,4 +1,5 @@
 const MAX_ATTACHMENT_SIZE = 7 * 1024 * 1024;
+const DEFAULT_FROM_EMAIL = "Acme <onboarding@resend.dev>";
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -18,10 +19,22 @@ export async function onRequestPost(context) {
       );
     }
 
-    if (!env.RESEND_API_KEY || !env.RESEND_TO_EMAIL || !env.RESEND_FROM_EMAIL) {
+    if (!env.RESEND_API_KEY || !env.RESEND_TO_EMAIL) {
       return json(
         {
-          error: "메일 설정이 아직 완료되지 않았습니다. 환경 변수를 확인하세요.",
+          error: "Email settings are incomplete. Check the Cloudflare Pages environment variables.",
+          env: envStatus,
+        },
+        500,
+      );
+    }
+
+    const fromEmail = resolveSenderEmail(env);
+    const senderValidationError = validateSenderEmail(fromEmail);
+    if (senderValidationError) {
+      return json(
+        {
+          error: senderValidationError,
           env: envStatus,
         },
         500,
@@ -40,7 +53,7 @@ export async function onRequestPost(context) {
     if (oversized) {
       return json(
         {
-          error: `${oversized.name} 파일이 너무 큽니다. 7MB 이하 파일만 첨부하세요.`,
+          error: `${oversized.name} is too large. Attach files up to 7 MB each.`,
         },
         400,
       );
@@ -61,20 +74,20 @@ export async function onRequestPost(context) {
     });
 
     const payload = {
-      from: env.RESEND_FROM_EMAIL,
+      from: fromEmail,
       to: [env.RESEND_TO_EMAIL],
-      subject: `[견적 요청] ${company} / ${brand} / ${sku}`,
+      subject: `[Quote Request] ${company} / ${brand} / ${sku}`,
       text: [
-        "새 견적 요청이 접수되었습니다.",
+        "A new quote request was submitted.",
         "",
-        `요청 시각: ${submittedAt}`,
-        `요청 업체: ${company}`,
-        `브랜드: ${brand}`,
-        `수량: ${quantity}`,
+        `Submitted at: ${submittedAt}`,
+        `Company: ${company}`,
+        `Brand: ${brand}`,
+        `Quantity: ${quantity}`,
         `SKU: ${sku}`,
-        `품목 타입: ${itemType}`,
-        `추가 설명: ${details || "없음"}`,
-        `첨부 사진 수: ${attachments.length}`,
+        `Item type: ${itemType}`,
+        `Details: ${details || "None"}`,
+        `Attached photos: ${attachments.length}`,
       ].join("\n"),
       attachments,
     };
@@ -93,7 +106,7 @@ export async function onRequestPost(context) {
     if (!resendResponse.ok) {
       return json(
         {
-          error: resendResult.message || "메일 발송에 실패했습니다.",
+          error: formatResendError(resendResult),
           details: resendResult,
           env: envStatus,
         },
@@ -103,7 +116,7 @@ export async function onRequestPost(context) {
 
     return json(
       {
-        message: `${company} 요청이 메일로 발송되었습니다.`,
+        message: `${company} request email sent successfully.`,
         id: resendResult.id,
       },
       200,
@@ -111,7 +124,7 @@ export async function onRequestPost(context) {
   } catch (error) {
     return json(
       {
-        error: error.message || "처리 중 오류가 발생했습니다.",
+        error: error.message || "An error occurred while handling the request.",
       },
       400,
     );
@@ -122,7 +135,7 @@ function requiredString(formData, name) {
   const value = optionalString(formData, name);
 
   if (!value) {
-    throw new Error(`${name} 값이 비어 있습니다.`);
+    throw new Error(`${name} is required.`);
   }
 
   return value;
@@ -153,11 +166,16 @@ function json(body, status) {
 }
 
 function buildEnvStatus(env) {
+  const resolvedFromEmail = resolveSenderEmail(env);
+
   return {
     resendApiKeyPresent: Boolean(env.RESEND_API_KEY),
     resendApiKeyMasked: maskValue(env.RESEND_API_KEY),
     resendFromEmailPresent: Boolean(env.RESEND_FROM_EMAIL),
     resendFromEmailMasked: maskEmail(env.RESEND_FROM_EMAIL),
+    emailFromPresent: Boolean(env.EMAIL_FROM),
+    emailFromMasked: maskEmail(env.EMAIL_FROM),
+    effectiveFromEmailMasked: maskEmail(resolvedFromEmail),
     resendToEmailPresent: Boolean(env.RESEND_TO_EMAIL),
     resendToEmailMasked: maskEmail(env.RESEND_TO_EMAIL),
   };
@@ -180,7 +198,8 @@ function maskEmail(value) {
     return null;
   }
 
-  const [localPart, domain] = value.split("@");
+  const normalized = extractEmailAddress(value);
+  const [localPart, domain] = normalized.split("@");
   if (!domain) {
     return "***";
   }
@@ -189,6 +208,49 @@ function maskEmail(value) {
     localPart.length <= 2 ? `${localPart.slice(0, 1)}***` : `${localPart.slice(0, 2)}***`;
 
   return `${visibleLocalPart}@${domain}`;
+}
+
+function resolveSenderEmail(env) {
+  return String(env.EMAIL_FROM || env.RESEND_FROM_EMAIL || DEFAULT_FROM_EMAIL).trim();
+}
+
+function validateSenderEmail(value) {
+  const sender = extractEmailAddress(value).toLowerCase();
+
+  if (!sender.includes("@")) {
+    return "EMAIL_FROM or RESEND_FROM_EMAIL must be a valid email address.";
+  }
+
+  const [, domain] = sender.split("@");
+
+  if (domain === "yourdomain.com") {
+    return [
+      "The configured sender is still using the placeholder domain yourdomain.com.",
+      "Set EMAIL_FROM or RESEND_FROM_EMAIL to onboarding@resend.dev for testing, or use an address on a verified domain in Resend.",
+    ].join(" ");
+  }
+
+  return null;
+}
+
+function extractEmailAddress(value) {
+  const input = String(value || "").trim();
+  const match = input.match(/<([^>]+)>/);
+
+  return (match ? match[1] : input).trim();
+}
+
+function formatResendError(result) {
+  const message = String(result?.message || "").trim();
+
+  if (/domain .* not verified/i.test(message)) {
+    return [
+      message,
+      "Update EMAIL_FROM or RESEND_FROM_EMAIL to onboarding@resend.dev for testing, or verify the sender domain in Resend and use an address on that domain.",
+    ].join(" ");
+  }
+
+  return message || "Email delivery failed.";
 }
 
 async function parseJsonResponse(response) {
