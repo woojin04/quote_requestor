@@ -29,10 +29,10 @@ form.addEventListener("submit", async (event) => {
       body: formData,
     });
 
-    const result = await request.json();
+    const result = await parseJsonResponse(request);
 
     if (!request.ok) {
-      throw new Error(result.error || "요청 전송에 실패했습니다.");
+      throw new Error(result.error || `요청 전송에 실패했습니다. (HTTP ${request.status})`);
     }
 
     response.textContent = result.message || "메일 전송이 완료되었습니다.";
@@ -44,3 +44,23 @@ form.addEventListener("submit", async (event) => {
     submitButton.disabled = false;
   }
 });
+
+async function parseJsonResponse(response) {
+  const text = await response.text();
+
+  if (!text) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    if (!response.ok) {
+      return {
+        error: `서버가 JSON이 아닌 응답을 반환했습니다. (HTTP ${response.status})`,
+      };
+    }
+
+    throw new Error("서버 응답을 해석하지 못했습니다.");
+  }
+}

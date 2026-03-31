@@ -43,7 +43,7 @@ export async function onRequestPost(context) {
     }
 
     const submittedAt = new Date().toLocaleString("ko-KR", {
-      timeZone: "Asia/Seoul",
+      timeZone: "America/Chicago",
     });
 
     const payload = {
@@ -74,7 +74,7 @@ export async function onRequestPost(context) {
       body: JSON.stringify(payload),
     });
 
-    const resendResult = await resendResponse.json();
+    const resendResult = await parseJsonResponse(resendResponse);
 
     if (!resendResponse.ok) {
       return json(
@@ -135,4 +135,21 @@ function json(body, status) {
       "Content-Type": "application/json; charset=UTF-8",
     },
   });
+}
+
+async function parseJsonResponse(response) {
+  const text = await response.text();
+
+  if (!text) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {
+      message: `Upstream service returned a non-JSON response. (HTTP ${response.status})`,
+      raw: text,
+    };
+  }
 }
