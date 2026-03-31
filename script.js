@@ -32,10 +32,10 @@ form.addEventListener("submit", async (event) => {
     const result = await parseJsonResponse(request);
 
     if (!request.ok) {
-      throw new Error(result.error || `요청 전송에 실패했습니다. (HTTP ${request.status})`);
+      throw new Error(formatResponseMessage(result, `요청 전송에 실패했습니다. (HTTP ${request.status})`));
     }
 
-    response.textContent = result.message || "메일 전송이 완료되었습니다.";
+    response.textContent = formatResponseMessage(result, "메일 전송이 완료되었습니다.");
     form.reset();
     fileHelp.textContent = "여러 장 선택할 수 있습니다.";
   } catch (error) {
@@ -44,6 +44,23 @@ form.addEventListener("submit", async (event) => {
     submitButton.disabled = false;
   }
 });
+
+function formatResponseMessage(result, fallbackMessage) {
+  const lines = [result.message || result.error || fallbackMessage];
+
+  if (result.env) {
+    lines.push(
+      `RESEND_API_KEY loaded: ${result.env.resendApiKeyPresent ? "YES" : "NO"}`,
+      `RESEND_API_KEY masked: ${result.env.resendApiKeyMasked || "null"}`,
+      `RESEND_FROM_EMAIL loaded: ${result.env.resendFromEmailPresent ? "YES" : "NO"}`,
+      `RESEND_FROM_EMAIL masked: ${result.env.resendFromEmailMasked || "null"}`,
+      `RESEND_TO_EMAIL loaded: ${result.env.resendToEmailPresent ? "YES" : "NO"}`,
+      `RESEND_TO_EMAIL masked: ${result.env.resendToEmailMasked || "null"}`,
+    );
+  }
+
+  return lines.join("\n");
+}
 
 async function parseJsonResponse(response) {
   const text = await response.text();

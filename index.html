@@ -13,18 +13,18 @@
   <main class="page-shell">
     <section class="request-panel">
       <p class="eyebrow">Internal Use</p>
-      <h1>견적 요청 폼</h1>
+      <h1>견적 요청</h1>
       <p class="hero-copy">
-        요청 내용을 정리해서 보내는 내부용 페이지.
+        요청 내용을 정리해서 메일로 전송하는 내부용 페이지입니다.
       </p>
 
       <form class="quote-form" id="quote-form">
         <label>
-          요청자 회사
-          <input type="text" name="company" placeholder="회사명을 입력하세요" required>
+          요청 업체
+          <input type="text" name="company" placeholder="업체명을 입력하세요" required>
         </label>
         <label>
-          물건 브랜드
+          브랜드
           <input type="text" name="brand" placeholder="브랜드명을 입력하세요" required>
         </label>
         <label>
@@ -32,15 +32,15 @@
           <input type="number" name="quantity" min="1" placeholder="예: 100" required>
         </label>
         <label>
-          품번
-          <input type="text" name="sku" placeholder="품번을 입력하세요" required>
+          SKU
+          <input type="text" name="sku" placeholder="SKU를 입력하세요" required>
         </label>
         <label class="full-width">
-          물건 타입
-          <input type="text" name="itemType" placeholder="예: 가방, 부품, 패키지" required>
+          품목 타입
+          <input type="text" name="itemType" placeholder="예: 가방, 부자재, 패키지" required>
         </label>
         <label class="full-width">
-          부가 설명
+          추가 설명
           <textarea name="details" rows="5" placeholder="추가 요청 사항이나 참고 내용을 적어주세요"></textarea>
         </label>
         <label class="full-width">
@@ -48,6 +48,10 @@
           <input type="file" id="photo-input" name="photos" accept="image/*" multiple>
         </label>
         <p class="file-help full-width" id="file-help">여러 장 선택할 수 있습니다.</p>
+        <label class="full-width">
+          <input type="checkbox" name="debugEnv" value="1">
+          환경 변수 테스트만 실행하기 (메일 미발송)
+        </label>
         <button class="button button-primary" id="submit-button" type="submit">메일로 보내기</button>
       </form>
 
