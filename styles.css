@@ -102,8 +102,56 @@ textarea {
   background: rgba(255, 255, 255, 0.72);
 }
 
+input:focus,
+textarea:focus,
+.file-dropzone:focus {
+  outline: none;
+  border-color: rgba(187, 90, 42, 0.55);
+  box-shadow: 0 0 0 4px rgba(187, 90, 42, 0.12);
+}
+
 textarea {
   resize: vertical;
+}
+
+.file-dropzone {
+  display: grid;
+  gap: 6px;
+  padding: 18px 20px;
+  border: 1.5px dashed rgba(187, 90, 42, 0.45);
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 247, 240, 0.82));
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.file-dropzone strong {
+  color: var(--ink);
+  font-size: 1rem;
+}
+
+.file-dropzone span {
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.file-dropzone:hover,
+.file-dropzone.is-dragover {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+  background:
+    linear-gradient(180deg, rgba(255, 248, 242, 0.98), rgba(255, 239, 226, 0.92));
+  box-shadow: 0 16px 30px rgba(187, 90, 42, 0.12);
+}
+
+.file-dropzone.has-files {
+  border-style: solid;
 }
 
 .button {

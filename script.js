@@ -1,19 +1,49 @@
 const form = document.getElementById("quote-form");
 const response = document.getElementById("form-response");
 const photoInput = document.getElementById("photo-input");
+const photoDropzone = document.getElementById("photo-dropzone");
 const fileHelp = document.getElementById("file-help");
 const submitButton = document.getElementById("submit-button");
 
-photoInput.addEventListener("change", () => {
-  const files = Array.from(photoInput.files || []);
+let selectedFiles = [];
 
-  if (files.length === 0) {
-    fileHelp.textContent = "여러 장 선택할 수 있습니다.";
+photoInput.addEventListener("change", () => {
+  mergeSelectedFiles(photoInput.files);
+});
+
+photoDropzone.addEventListener("click", () => {
+  photoInput.click();
+});
+
+photoDropzone.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    photoInput.click();
+  }
+});
+
+["dragenter", "dragover"].forEach((eventName) => {
+  photoDropzone.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    photoDropzone.classList.add("is-dragover");
+  });
+});
+
+["dragleave", "dragend", "drop"].forEach((eventName) => {
+  photoDropzone.addEventListener(eventName, (event) => {
+    event.preventDefault();
+    photoDropzone.classList.remove("is-dragover");
+  });
+});
+
+photoDropzone.addEventListener("drop", (event) => {
+  const files = event.dataTransfer?.files;
+
+  if (!files || files.length === 0) {
     return;
   }
 
-  const fileNames = files.map((file) => file.name).join(", ");
-  fileHelp.textContent = `${files.length}장 선택됨: ${fileNames}`;
+  mergeSelectedFiles(files);
 });
 
 form.addEventListener("submit", async (event) => {
@@ -23,6 +53,8 @@ form.addEventListener("submit", async (event) => {
   submitButton.disabled = true;
 
   try {
+    syncPhotoInput();
+
     const formData = new FormData(form);
     const request = await fetch("/api/request", {
       method: "POST",
@@ -37,13 +69,65 @@ form.addEventListener("submit", async (event) => {
 
     response.textContent = formatResponseMessage(result, "메일 전송이 완료되었습니다.");
     form.reset();
-    fileHelp.textContent = "여러 장 선택할 수 있습니다.";
+    selectedFiles = [];
+    syncFileHelp();
   } catch (error) {
     response.textContent = error.message || "오류가 발생했습니다.";
   } finally {
     submitButton.disabled = false;
   }
 });
+
+function mergeSelectedFiles(fileList) {
+  const incomingFiles = Array.from(fileList || []);
+
+  if (incomingFiles.length === 0) {
+    syncFileHelp();
+    return;
+  }
+
+  for (const file of incomingFiles) {
+    const duplicate = selectedFiles.some((existingFile) => isSameFile(existingFile, file));
+
+    if (!duplicate) {
+      selectedFiles.push(file);
+    }
+  }
+
+  syncPhotoInput();
+  syncFileHelp();
+}
+
+function syncPhotoInput() {
+  const dataTransfer = new DataTransfer();
+
+  for (const file of selectedFiles) {
+    dataTransfer.items.add(file);
+  }
+
+  photoInput.files = dataTransfer.files;
+}
+
+function syncFileHelp() {
+  if (selectedFiles.length === 0) {
+    fileHelp.textContent = "여러 장 선택할 수 있습니다.";
+    photoDropzone.classList.remove("has-files");
+    return;
+  }
+
+  const fileNames = selectedFiles.map((file) => file.name).join(", ");
+  fileHelp.textContent = `${selectedFiles.length}개 선택됨: ${fileNames}`;
+  photoDropzone.classList.add("has-files");
+}
+
+function isSameFile(left, right) {
+  return (
+    left.name === right.name &&
+    left.size === right.size &&
+    left.lastModified === right.lastModified &&
+    left.type === right.type
+  );
+}
 
 function formatResponseMessage(result, fallbackMessage) {
   const lines = [result.message || result.error || fallbackMessage];
